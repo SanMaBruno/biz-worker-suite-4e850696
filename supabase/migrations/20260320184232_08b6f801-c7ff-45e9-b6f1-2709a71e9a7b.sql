@@ -329,13 +329,27 @@ $$;
 -- ============================================
 
 -- PROFILES
-CREATE POLICY "Users view own profile" ON public.profiles FOR SELECT USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'superadmin') OR public.is_admin_or_rrhh(auth.uid()));
+CREATE POLICY "Users view own profile" ON public.profiles FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Superadmin views all profiles" ON public.profiles FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'superadmin'
+  )
+);
+CREATE POLICY "RRHH views all profiles" ON public.profiles FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'rrhh'
+  )
+);
 CREATE POLICY "Users update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "System inserts profiles" ON public.profiles FOR INSERT WITH CHECK (true);
 
 -- USER_ROLES
-CREATE POLICY "Users view own roles" ON public.user_roles FOR SELECT USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'superadmin'));
-CREATE POLICY "Superadmin manages roles" ON public.user_roles FOR ALL USING (public.has_role(auth.uid(), 'superadmin'));
+CREATE POLICY "Users view own roles" ON public.user_roles FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Superadmin manages roles" ON public.user_roles FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'superadmin'
+  )
+);
 
 -- PERMISSIONS
 CREATE POLICY "Authenticated read permissions" ON public.permissions FOR SELECT TO authenticated USING (true);

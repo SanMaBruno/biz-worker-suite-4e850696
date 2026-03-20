@@ -28,6 +28,15 @@ serve(async (req) => {
       if (error) { console.log("User exists or error:", u.email, error.message); continue; }
       if (data.user) {
         userIds[u.email] = data.user.id;
+        // Insert profile
+        await supabase.from("profiles").insert({
+          user_id: data.user.id,
+          first_name: u.fn,
+          last_name: u.ln,
+          email: u.email,
+          is_active: true
+        });
+        // Insert role
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: u.role });
       }
     }
