@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
-  LayoutDashboard, Users, FileText, DollarSign, Settings, LogOut,
+  LayoutDashboard, Users, FileText, DollarSign, LogOut,
   Menu, X, ChevronDown, Building2, Shield, ClipboardList
 } from 'lucide-react';
 
@@ -12,6 +12,10 @@ interface NavItem {
   path: string;
   icon: React.ReactNode;
   children?: { label: string; path: string }[];
+}
+
+function getInitials(firstName?: string, lastName?: string) {
+  return `${(firstName || '')[0] || ''}${(lastName || '')[0] || ''}`.toUpperCase();
 }
 
 export default function BackofficeLayout() {
@@ -73,12 +77,10 @@ export default function BackofficeLayout() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-foreground/30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200
         lg:translate-x-0 lg:static lg:z-auto
@@ -145,19 +147,26 @@ export default function BackofficeLayout() {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-sidebar-border">
-          <div className="flex items-center justify-between">
-            <div className="text-xs truncate">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8 flex-shrink-0">
+              {profile?.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={profile.first_name} />
+              ) : null}
+              <AvatarFallback className="text-xs bg-sidebar-accent text-sidebar-primary">
+                {getInitials(profile?.first_name, profile?.last_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-xs truncate flex-1">
               <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
               <p className="text-sidebar-foreground/60 capitalize">{roles.join(', ')}</p>
             </div>
-            <button onClick={signOut} className="text-sidebar-foreground/60 hover:text-sidebar-foreground">
+            <button onClick={signOut} className="text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0">
               <LogOut size={16} />
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b bg-card flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
           <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
