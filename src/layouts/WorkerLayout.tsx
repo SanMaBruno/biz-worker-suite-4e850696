@@ -2,6 +2,11 @@ import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { LayoutDashboard, FileText, FolderOpen, User, LogOut, Menu, X } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
+function getInitials(firstName?: string, lastName?: string) {
+  return `${(firstName || '')[0] || ''}${(lastName || '')[0] || ''}`.toUpperCase();
+}
 
 export default function WorkerLayout() {
   const { profile, signOut } = useAuth();
@@ -19,12 +24,10 @@ export default function WorkerLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top nav */}
       <header className="bg-primary text-primary-foreground sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <span className="font-semibold text-sm">Portal del Trabajador</span>
 
-          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
               <Link
@@ -43,6 +46,14 @@ export default function WorkerLayout() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <Avatar className="h-7 w-7">
+              {profile?.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={profile.first_name} />
+              ) : null}
+              <AvatarFallback className="text-[10px] bg-primary-foreground/20 text-primary-foreground">
+                {getInitials(profile?.first_name, profile?.last_name)}
+              </AvatarFallback>
+            </Avatar>
             <span className="text-xs opacity-80">{profile?.first_name} {profile?.last_name}</span>
             <button onClick={signOut} className="hover:opacity-80" title="Cerrar sesión">
               <LogOut size={16} />
@@ -54,7 +65,6 @@ export default function WorkerLayout() {
           </button>
         </div>
 
-        {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-primary-foreground/20 px-4 py-3 space-y-1">
             {navItems.map((item) => (
